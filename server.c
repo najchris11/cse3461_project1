@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
     return 1;
   }
   portNum = atoi(argv[1]);
-  if ((socketDesc = socket(AF_INET, SOCK_STREAM, 0) < 0)) {
+  if ((socketDesc = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     printf("error on socket creation\n");
     return 1;
   }
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
       if (rc <= 0) {
         printf("this is awkward... the other side quit while sending\n");
         flag = 1;
-        break;
+        continue;
       }
       totalBytes += rc;
       charPtr += rc;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
           cJSON_GetObjectItemCaseSensitive(jsonResponse, "message");
       if (cJSON_IsString(response) && response->valuestring != NULL) {
         printf("Message: %s\n", response->valuestring);
-
+  cJSON_free(jsonResponse);
         //response
         jsonResponse = cJSON_CreateObject();
         cJSON_AddStringToObject(jsonResponse, "response", "Message received and processed");
@@ -96,13 +96,13 @@ int main(int argc, char *argv[]) {
 
         if (write(connectedSocketDesc, &convertedLength, sizeof(int)) < sizeof(int)) {
         printf("error sending message size\n");
-        cleanup(socketDesc, jsonResponse, json_str);
+        cleanup(connectedSocketDesc, jsonResponse, json_str);
         return 1;
     }
 
     if (write(connectedSocketDesc, json_str, messageSize) < messageSize) {
         printf("error sending message\n");
-        cleanup(socketDesc, jsonResponse, json_str);
+        cleanup(connectedSocketDesc, jsonResponse, json_str);
         return 1;
     }
       } else {

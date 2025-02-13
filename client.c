@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
     portNum = atoi(argv[1]);
     char *ipAddress = argv[2];
 
+//socket setup
     if ((socketDesc = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
         perror("error opening stream socket");
         return 1;
@@ -59,7 +60,15 @@ int main(int argc, char *argv[]) {
         cleanup(socketDesc, NULL, NULL);
         return 1;
     }
+    if (message[strlen(message) - 1] != '\n') {
+    printf("warning: input exceeds 1023 characters and will be truncated!\n");
+
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF);
+}
     message[strcspn(message, "\n")] = '\0';
+
+    //prepping message for sending
 
     cJSON *jsonMessage = cJSON_CreateObject();
     cJSON_AddStringToObject(jsonMessage, "message", message);
@@ -82,6 +91,8 @@ int main(int argc, char *argv[]) {
     cJSON_free(json_str);
     json_str = NULL;
 
+
+// prepping for response
     int receivedLength;
     if (read(socketDesc, &receivedLength, sizeof(int)) < sizeof(int)) {
         printf("error receiving response size\n");
